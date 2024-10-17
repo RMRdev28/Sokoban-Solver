@@ -63,7 +63,14 @@ class SokobanPuzzle:
         pass 
     
     def deepCopy(self):
-        pass
+        state = SokobanPuzzle("levels/level.txt")
+        state.grid = [row[:] for row in self.grid]
+        state.obstacles = self.obstacles
+        state.goals = self.goals
+        state.boxes = self.boxes
+        state.player = self.player
+        return state
+        
               
               
 

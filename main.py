@@ -6,6 +6,8 @@ from game.visualizer import Visualizer
 def main():
 
   board = SokobanPuzzle("levels/level.txt")
+  
+#   print(board.grid)
 
 
   pygame.init()
