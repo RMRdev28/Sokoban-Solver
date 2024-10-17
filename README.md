@@ -161,6 +161,3 @@ Test examples (levels) are provided as per Figure 4 in the assignment. Each leve
 
 This project is developed for educational purposes as part of the Master 1, Visual Computing program at USTHB.
 
----
-
-**Note**: Make sure to replace `https://github.com/RMRdev28/Sokoban-Solver` with the actual URL of your repository. Update any additional details specific to your implementation, such as file names, additional command-line arguments, or instructions.
