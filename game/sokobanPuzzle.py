@@ -63,8 +63,7 @@ class SokobanPuzzle:
         pass 
     
     def deepCopy(self):
-        newState = SokobanPuzzle()
-        newState. = self.width 
+        pass
               
               
 
