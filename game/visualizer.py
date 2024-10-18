@@ -39,6 +39,6 @@ class Visualizer:
                         self.screen.blit(self.box_on_targetImg, rect)
                     else:
                         self.screen.blit(self.boxImg, rect)
-                if pos == self.board.player.position:
+                if pos == self.board.player:
                     self.screen.blit(self.playerImg, rect)
     pygame.display.flip()

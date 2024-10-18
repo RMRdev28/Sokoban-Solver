@@ -1,5 +1,3 @@
-from game.entities import Player
-
 class SokobanPuzzle:
     def __init__(self, level_file):
       self.width = 0
@@ -46,7 +44,7 @@ class SokobanPuzzle:
                     self.goals.add(pos)
                     row.append('*')
                 elif char == 'R':
-                    player = Player(pos)
+                    player = pos
                     self.player = player
                     row.append('R')
                 elif char == '.':
@@ -73,7 +71,7 @@ class SokobanPuzzle:
 
         for action, (dx, dy) in actions.items():
            
-            px, py = self.player.position
+            px, py = self.player
             nextPx = px + dx
             nextPy = py + dy
             nextCell = self.grid[nextPx][nextPy]
@@ -115,7 +113,7 @@ class SokobanPuzzle:
     
     
     def movePlayer(self,direction):
-        oldX, oldY = self.player.position
+        oldX, oldY = self.player
         newX, newY = direction
         if self.grid[oldX][oldY] == 'R':
             self.grid[oldX][oldY] = ' '
@@ -127,7 +125,7 @@ class SokobanPuzzle:
         elif self.grid[newX][newY] == 'S':
             self.grid[newX][newY] = '.'
             
-        self.player.position = direction
+        self.player = direction
     
     
     def moveBox(self, box, playerDirection,boxDirection):
