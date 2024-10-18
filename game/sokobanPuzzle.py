@@ -1,3 +1,5 @@
+from game.entities import Player
+
 class SokobanPuzzle:
     def __init__(self, level_file):
       self.width = 0
@@ -44,7 +46,8 @@ class SokobanPuzzle:
                     self.goals.add(pos)
                     row.append('*')
                 elif char == 'R':
-                    self.player = pos
+                    player = Player(pos)
+                    self.player = player
                     row.append('R')
                 elif char == '.':
                     self.player = pos
@@ -60,7 +63,46 @@ class SokobanPuzzle:
     
     
     def successorFunction(self):
-        pass 
+        actions = {
+            'UP': (-1, 0),
+            'DOWN': (1, 0),
+            'LEFT': (0, -1),
+            'RIGHT': (0, 1)
+        }
+        successors = []
+
+        for action, (dx, dy) in actions.items():
+           
+            px, py = self.player.position
+            nextPx = px + dx
+            nextPy = py + dy
+            nextCell = self.grid[nextPx][nextPy]
+
+            if nextCell == ' ' or nextCell == 'S':
+                
+                successorState = self.deepCopy()
+                nextPosition = (nextPx, nextPy)
+                successorState.movePlayer(nextPosition)
+                successors.append((action, successorState))
+            elif nextCell == 'B' or nextCell == '*':
+               
+                nextBx = nextPx + dx
+                nextBy = nextPy + dy
+
+
+                nextBoxCell = self.grid[nextBx][nextBy]
+                if nextBoxCell == ' ' or nextBoxCell == 'S':
+                    successorState = self.copy()
+                    playerPosition = (nextPx, nextPy)
+                    boxPosition = (nextBx, nextBy)
+                    successorState.moveBox(playerPosition,boxPosition)
+                    successors.append((action, successorState))
+                else:
+                    continue  
+            else:
+                continue  
+
+        return successors
     
     def deepCopy(self):
         state = SokobanPuzzle("levels/level.txt")
@@ -70,6 +112,42 @@ class SokobanPuzzle:
         state.boxes = self.boxes
         state.player = self.player
         return state
+    
+    
+    def movePlayer(self,direction):
+        oldX, oldY = self.player.position
+        newX, newY = direction
+        if self.grid[oldX][oldY] == 'R':
+            self.grid[oldX][oldY] = ' '
+        elif self.grid[oldX][oldY] == '.':
+            self.grid[oldX][oldY] = 'S'
+            
+        if self.grid[newX][newY] == ' ':
+            self.grid[newX][newY] = 'R'
+        elif self.grid[newX][newY] == 'S':
+            self.grid[newX][newY] = '.'
+            
+        self.player.position = direction
+    
+    
+    def moveBox(self, box, playerDirection,boxDirection):
+        oldX, oldY = box
+        newX, newY = boxDirection
+
+        self.movePlayer(playerDirection)
+        
+        if self.grid[oldX][oldY] == 'B':
+            self.grid[oldX][oldY] = ' '
+        elif self.grid[oldX][oldY] == '*':
+            self.grid[oldX][oldY] = 'S'
+            
+        if self.grid[newX][newY] == ' ':
+            self.grid[newX][newY] = 'B'
+        elif self.grid[newX][newY] == 'S':
+            self.grid[newX][newY] = '*'
+            
+        self.boxes.remove(box)
+        self.boxes.add(boxDirection)
         
               
               

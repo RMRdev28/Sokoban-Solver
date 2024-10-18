@@ -6,6 +6,8 @@ from game.visualizer import Visualizer
 def main():
 
   board = SokobanPuzzle("levels/level.txt")
+  sucs = board.successorFunction()
+  print(sucs)
   
 #   print(board.grid)
 

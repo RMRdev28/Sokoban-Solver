@@ -15,12 +15,12 @@ class Visualizer:
 
   def load_assets(self):
      
-      self.floor_img = pygame.image.load('assets/ground.png').convert()
-      self.wall_img = pygame.image.load('assets/obstacle.png').convert()
-      self.box_img = pygame.image.load('assets/box.png').convert_alpha()
-      self.target_img = pygame.image.load('assets/goal.png').convert_alpha()
-      self.player_img = pygame.image.load('assets/player.png').convert_alpha()
-      self.box_on_target_img = pygame.image.load('assets/box_target.png').convert_alpha()
+      self.floorImg = pygame.image.load('assets/ground.png').convert()
+      self.wallImg = pygame.image.load('assets/obstacle.png').convert()
+      self.boxImg = pygame.image.load('assets/box.png').convert_alpha()
+      self.targetImg = pygame.image.load('assets/goal.png').convert_alpha()
+      self.playerImg = pygame.image.load('assets/player.png').convert_alpha()
+      self.box_on_targetImg = pygame.image.load('assets/box_target.png').convert_alpha()
 
   def update(self):
     for y in range(self.board.height):
@@ -29,16 +29,16 @@ class Visualizer:
             rect = pygame.Rect(x * self.TILE_SIZE, y * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE)
             
             if pos in self.board.obstacles:
-                self.screen.blit(self.wall_img, rect)
+                self.screen.blit(self.wallImg, rect)
             else:
-                self.screen.blit(self.floor_img, rect)
+                self.screen.blit(self.floorImg, rect)
                 if pos in self.board.goals:
-                    self.screen.blit(self.target_img, rect)
+                    self.screen.blit(self.targetImg, rect)
                 if pos in self.board.boxes:
                     if pos in self.board.goals:
-                        self.screen.blit(self.box_on_target_img, rect)
+                        self.screen.blit(self.box_on_targetImg, rect)
                     else:
-                        self.screen.blit(self.box_img, rect)
-                if pos == self.board.player:
-                    self.screen.blit(self.player_img, rect)
+                        self.screen.blit(self.boxImg, rect)
+                if pos == self.board.player.position:
+                    self.screen.blit(self.playerImg, rect)
     pygame.display.flip()
