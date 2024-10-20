@@ -3,12 +3,14 @@ import pygame
 from game.sokobanPuzzle import SokobanPuzzle
 from game.visualizer import Visualizer
 from algorithms.bfs import Bfs
+import time
 
 def main():
 
   board = SokobanPuzzle("levels/level.txt")
   bfs = Bfs(board)
-  bfs.bfsSearch()
+  path = bfs.bfsSearch()
+  
   
 #   print(board.grid)
 
@@ -16,8 +18,12 @@ def main():
   pygame.init()
   visualizer = Visualizer(board)
 
-
-  visualizer.update()
+  for node in path.getPath():
+        board = node.state  
+        visualizer.board = board
+        visualizer.update()  
+        time.sleep(0.5)
+  
   running = True
   clock = pygame.time.Clock()
 

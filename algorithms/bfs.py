@@ -29,7 +29,9 @@ class Bfs:
                 
                 if child.state not in [node.state for node in self.closed] and child not in self.open:
                     if state.isGoal():  
+                        
                         print("Goal")
+                        print(child.getPath())
                         return child
                     self.open.append(child)
     
