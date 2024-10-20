@@ -57,7 +57,7 @@ class SokobanPuzzle:
             self.grid.append(row)
               
     def isGoal(self):
-        pass
+        return self.boxes == self.goals
     
     
     def successorFunction(self):
@@ -90,7 +90,7 @@ class SokobanPuzzle:
 
                 nextBoxCell = self.grid[nextBx][nextBy]
                 if nextBoxCell == ' ' or nextBoxCell == 'S':
-                    successorState = self.copy()
+                    successorState = self.deepCopy()
                     playerPosition = (nextPx, nextPy)
                     boxPosition = (nextBx, nextBy)
                     successorState.moveBox(playerPosition,boxPosition)
@@ -101,13 +101,15 @@ class SokobanPuzzle:
                 continue  
 
         return successors
+ 
     
     def deepCopy(self):
         state = SokobanPuzzle("levels/level.txt")
         state.grid = [row[:] for row in self.grid]
         state.obstacles = self.obstacles
-        state.goals = self.goals
-        state.boxes = self.boxes
+        state.goals = self.goals.copy()
+        
+        state.boxes = self.boxes.copy()
         state.player = self.player
         return state
     
@@ -128,10 +130,11 @@ class SokobanPuzzle:
         self.player = direction
     
     
-    def moveBox(self, box, playerDirection,boxDirection):
-        oldX, oldY = box
+    def moveBox(self, playerDirection,boxDirection):
+        oldX, oldY = playerDirection
         newX, newY = boxDirection
-
+        print(self.boxes)
+        self.boxes.remove(playerDirection)
         self.movePlayer(playerDirection)
         
         if self.grid[oldX][oldY] == 'B':
@@ -144,7 +147,8 @@ class SokobanPuzzle:
         elif self.grid[newX][newY] == 'S':
             self.grid[newX][newY] = '*'
             
-        self.boxes.remove(box)
+       
+        
         self.boxes.add(boxDirection)
         
               

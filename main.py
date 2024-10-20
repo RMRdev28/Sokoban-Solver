@@ -2,12 +2,13 @@
 import pygame
 from game.sokobanPuzzle import SokobanPuzzle
 from game.visualizer import Visualizer
+from algorithms.bfs import Bfs
 
 def main():
 
   board = SokobanPuzzle("levels/level.txt")
-  sucs = board.successorFunction()
-  print(sucs)
+  bfs = Bfs(board)
+  bfs.bfsSearch()
   
 #   print(board.grid)
 
