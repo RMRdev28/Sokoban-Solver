@@ -1,26 +1,30 @@
 
+
 import pygame
 from game.sokobanPuzzle import SokobanPuzzle
 from game.visualizer import Visualizer
 from algorithms.bfs import Bfs
+from algorithms.astar import AStar
 import time
 
 def main():
 
   board = SokobanPuzzle("levels/level.txt")
-  bfs = Bfs(board)
-  path = bfs.bfsSearch()
+  board.load_level()
+  bfs = AStar(board)
+  path = bfs.aStarSearch()
   
   
 #   print(board.grid)
-
-
   pygame.init()
   visualizer = Visualizer(board)
 
   for node in path.getPath():
         board = node.state  
+        # board.load_level()
+        print(f"Player position{board.player}") 
         visualizer.board = board
+        
         visualizer.update()  
         time.sleep(0.5)
   

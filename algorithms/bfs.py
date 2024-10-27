@@ -15,26 +15,21 @@ class Bfs:
             return self.initNode
         
         self.open.append(self.initNode)
-        self.closed = []
         
         while len(self.open) > 0:
             current = self.open.popleft()
             self.closed.append(current)
-            
-            
+            print(f"Current : {current.state.player}")
+
             for action, state in current.state.successorFunction():
                 child = Node(state, current, action)
-                print(f"{child.state} Step: {i}")
-                i += 1
-                
-                if child.state not in [node.state for node in self.closed] and child not in self.open:
-                    if state.isGoal():  
-                        
-                        print("Goal")
-                        print(child.getPath())
+
+                if child.state not in [node.state for node in self.closed] and child.state not in [node.state for node in self.open]:
+                    if child.state.isGoal():  
                         return child
-                    self.open.append(child)
-    
+                    else:
+                        self.open.append(child)
+
         return None
         
         
