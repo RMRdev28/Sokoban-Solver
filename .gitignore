@@ -1,0 +1,10 @@
+rapport.aux
+rapport.log
+rapport.pdf
+rapport.synctex.gz
+rapport.tex 
+
+figures/
+
+__pycache__/
+*.py[cod]

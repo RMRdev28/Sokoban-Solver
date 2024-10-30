@@ -6,6 +6,7 @@ class AStar:
         self.state = state
         self.open = deque()
         self.closed = []
+        self.hFunction = None
         self.initNode = Node(state, None, None)
         self.initNode.g = 0
         self.initNode.h = self.h1(state)
@@ -93,7 +94,7 @@ class AStar:
             for action, state in current.state.successorFunction():
                 child = Node(state, current, action)
                 child.g = current.g + 1  
-                child.h = self.h3(state)
+                child.h = self.hFunction(state)
                 child.f = child.g + child.h
 
                 if child.state not in [node.state for node in self.closed] and child.state not in [node.state for node in self.open]:
