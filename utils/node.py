@@ -15,8 +15,6 @@ class Node:
         while node:
             path.append(node)
             node = node.parent
-            
-            # print(f"Path : {node.action}" )
         
         return list(reversed(path))
     

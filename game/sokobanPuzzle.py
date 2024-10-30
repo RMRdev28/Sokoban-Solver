@@ -1,13 +1,15 @@
 class SokobanPuzzle:
     def __init__(self, level_file):
-      self.width = 5
+      self.width = 0
       self.level = level_file
-      self.height = 5
+      self.height = 0
       self.obstacles = set()
       self.goals = set()
       self.boxes = set()
+      self.outSides = set()
       self.player = None
       self.grid = []
+      self.deadLockGrid = []
       
 
     def __eq__(self, other):
@@ -55,25 +57,102 @@ class SokobanPuzzle:
                     self.player = pos
                     self.goals.add(pos)
                     row.append('.')
+                elif char == 'T':
+                    row.append('T')
+                    self.outSides.add(pos)
                 else:
                     row.append(' ')  
 
             self.grid.append(row)
+        
+        self.width = len(self.grid[0])
+        self.height = len(self.grid)
+
+            
               
+    def generateCornerDeadlock(self):
+        actions = {
+            'UP': (0, -1),    
+            'RIGHT': (1, 0),
+            'LEFT': (-1, 0),
+            'DOWN': (0, 1)
+        }
+        deadLockGrid = []
+        
+        px = 0
+        for row in self.grid:
+            rowDeadLock = []
+
+            py = 0
+            for cell in row:
+                obstacleCount = 0
+                for action, (dx, dy) in actions.items():
+                    nextPx = px + dx
+                    nextPy = py + dy
+                    if 0 <= nextPy < len(self.grid) and 0 <= nextPx < len(self.grid[0]):
+                        if(cell == 'O'):
+                            obstacleCount += 1
+                    
+                    if obstacleCount == 2:
+                        break
+                
+                if obstacleCount == 2:
+                    rowDeadLock.append('D')
+                else:
+                    rowDeadLock.append(' ')
+            py += 1
+            deadLockGrid.append(rowDeadLock)
+        px += 1
+        self.deadLockGrid = deadLockGrid
+            
+          
+    def generateLignDeadLock(self):
+        actions = {
+            'UP': (0, -1),    
+            'RIGHT': (1, 0),
+            'LEFT': (-1, 0),
+            'DOWN': (0, 1)
+        }
+        px = 0
+        for row in self.deadLockGrid:
+            py = 0
+            for cell in row:
+                obstacleCount = 0
+                if cell == ' ':
+           
+                    for action, (dx, dy) in actions.items():
+                        nextPx = px + dx
+                        nextPy = py + dy
+                        if 0 <= nextPy < len(self.deadLockGrid) and 0 <= nextPx < len(self.deadLockGrid[0]):
+                            
+                            if(self.deadLockGrid[nextPx][nextPy] == 'D'):
+                           
+                                obstacleCount += 1
+                                break
+                        
+
+                    
+                    if obstacleCount == 1:
+                        self.deadLockGrid[px][py] = 'D'
+                py += 1
+                
+            px += 1
+        
+        
     def isGoal(self):
-        print(f"Boxes {self.boxes}")
-        print(f"Goals {self.goals}")
         return self.boxes == self.goals
     
     
     def deepCopy(self):
-        state = SokobanPuzzle("levels/level.txt") 
+        state = SokobanPuzzle(self.level) 
+        state.width = self.width
+        state.height = self.height
         state.grid = [row[:] for row in self.grid]
         state.obstacles = self.obstacles.copy()
+        state.outSides = self.outSides.copy()
         state.goals = self.goals.copy()
         state.boxes = self.boxes.copy()
         state.player = self.player
-        print(state.player)
         return state
     
     def successorFunction(self):
@@ -86,17 +165,16 @@ class SokobanPuzzle:
         successors = []
         
         for action, (dx, dy) in actions.items():
-            px, py = self.player  # Unpack as x,y to match how we stored it
+            px, py = self.player
             nextPx = px + dx
             nextPy = py + dy
             
-            # Check bounds first
             if 0 <= nextPy < len(self.grid) and 0 <= nextPx < len(self.grid[0]):
-                nextCell = self.grid[nextPy][nextPx]  # Grid is accessed [y][x]
+                nextCell = self.grid[nextPy][nextPx] 
                 
                 if nextCell == ' ' or nextCell == 'S':
                     successorState = self.deepCopy()
-                    successorState.movePlayer((nextPx, nextPy))  # Pass (x,y)
+                    successorState.movePlayer((nextPx, nextPy))
                     successors.append((action, successorState))
                     
                 elif nextCell == 'B' or nextCell == '*':
@@ -114,15 +192,15 @@ class SokobanPuzzle:
         return successors
 
     def movePlayer(self, direction):
-        oldX, oldY = self.player  # Unpack as x,y
-        newX, newY = direction    # Receive as x,y
+        oldX, oldY = self.player 
+        newX, newY = direction 
         
-        if self.grid[oldY][oldX] == 'R':  # Access grid as [y][x]
+        if self.grid[oldY][oldX] == 'R':
             self.grid[oldY][oldX] = ' '
         elif self.grid[oldY][oldX] == '.':
             self.grid[oldY][oldX] = 'S'
         
-        if self.grid[newY][newX] == ' ':   # Access grid as [y][x]
+        if self.grid[newY][newX] == ' ':
             self.grid[newY][newX] = 'R'
         elif self.grid[newY][newX] == 'S':
             self.grid[newY][newX] = '.'
@@ -130,21 +208,18 @@ class SokobanPuzzle:
         self.player = direction
 
     def moveBox(self, playerDirection, boxDirection):
-        oldX, oldY = playerDirection  # Unpack as x,y
-        newX, newY = boxDirection    # Receive as x,y
-        
-        print(f"Before change {self.boxes}")
+        oldX, oldY = playerDirection 
+        newX, newY = boxDirection    
         self.movePlayer(playerDirection)
-        
-        # Update box position
+
         if (oldX, oldY) in self.boxes:
             self.boxes.remove((oldX, oldY))
-        if self.grid[oldY][oldX] == 'B':   # Access grid as [y][x]
+        if self.grid[oldY][oldX] == 'B':  
             self.grid[oldY][oldX] = ' '
         elif self.grid[oldY][oldX] == '*':
             self.grid[oldY][oldX] = 'S'
         
-        if self.grid[newY][newX] == ' ':    # Access grid as [y][x]
+        if self.grid[newY][newX] == ' ':
             self.grid[newY][newX] = 'B'
         elif self.grid[newY][newX] == 'S':
             self.grid[newY][newX] = '*'

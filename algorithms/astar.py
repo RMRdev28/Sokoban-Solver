@@ -25,66 +25,100 @@ class AStar:
     
     def h2(self, state):
         misplaced = self.h1(state)
-        misplaced_cost = 2 * misplaced
-        total_min_distances = 0
+        misplacedCost = 2 * misplaced
+        totalMinDistance = 0
         
         for box in state.boxes:
             if box not in state.goals: 
-                min_distance = float('inf')
+                minDistance = float('inf')
                 for goal in state.goals:
                     distance = self.manhattan_distance(box, goal)
-                    min_distance = min(min_distance, distance)
-                total_min_distances += min_distance
+                    minDistance = min(minDistance, distance)
+                totalMinDistance += minDistance
         
-        return misplaced_cost + total_min_distances
+        return misplacedCost + totalMinDistance
     
-    def get_lowest_f_node(self):
+    
+
+    
+    def h3(self, state):
+        h2Value = self.h2(state)
+        unmatchedBoxes = [box for box in state.boxes if box not in state.goals]
+        
+        if unmatchedBoxes:
+           
+            playerToBoxDistance = [
+                self.manhattan_distance(state.player, box) 
+                for box in unmatchedBoxes
+            ]
+            minPlayerDistance = min(playerToBoxDistance)
+
+            return h2Value + minPlayerDistance
+        
+        return h2Value
+            
+            
+
+    def getLowesFNode(self):
         if not self.open:
             return None
         
-        lowest_f_node = self.open[0]
-        lowest_f = lowest_f_node.f
+        lowestFNode = self.open[0]
+        lowestF = lowestFNode.f
         
         for node in self.open:
-            if node.f < lowest_f:
-                lowest_f = node.f
-                lowest_f_node = node
+            if node.f < lowestF:
+                lowestF = node.f
+                lowestFNode = node
                 
-        self.open.remove(lowest_f_node)
-        return lowest_f_node
+        self.open.remove(lowestFNode)
+        return lowestFNode
     
     def aStarSearch(self):
+        self.open.append(self.initNode)
         if self.state.isGoal():
             return self.initNode
-        
-        self.open.append(self.initNode)
+        i = 1
+   
         
         while len(self.open) > 0:
-            current = self.get_lowest_f_node()
+            current = self.getLowesFNode()
+            if current.state.isGoal():
+                print("Number of steps to reach goal: ", i)
+                return current
             self.closed.append(current)
-            print(f"Current : {current.state.player}, f={current.f}")
-
+            print("step Number: ", i)
+            i+=1    
+            
             for action, state in current.state.successorFunction():
                 child = Node(state, current, action)
                 child.g = current.g + 1  
-                child.h = self.h2(state)
+                child.h = self.h3(state)
                 child.f = child.g + child.h
 
-                if child.state not in [node.state for node in self.closed]:
+                if child.state not in [node.state for node in self.closed] and child.state not in [node.state for node in self.open]:
+                    self.open.append(child)
                     
-                    existing_open = None
+                else:
+                    existingOpen = None
                     for node in self.open:
-                        if node.state == child.state:
-                            existing_open = node
+                        if node.state == child.state and node.f > child.f:
+                            existingOpen = node
                             break
                     
-                    if existing_open is None: 
-                        if child.state.isGoal():
-                            return child
+                    existingClose = None
+                    for node in self.closed:
+                        if node.state == child.state and node.f > child.f:
+                            existingClose = node
+                            break
+                        
+                    if child.state in [node.state for node in self.open] and existingOpen:
+                        self.open.remove(existingOpen)
                         self.open.append(child)
-                    else:  
-                        if child.g < existing_open.g: 
-                            self.open.remove(existing_open)
-                            self.open.append(child)
-
+                    elif child.state in [node.state for node in self.closed] and existingClose:
+                        self.closed.remove(existingClose)
+                        self.open.append(child)
+                    
+                    
+                            
         return None

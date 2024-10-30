@@ -17,17 +17,19 @@ class Bfs:
         self.open.append(self.initNode)
         
         while len(self.open) > 0:
+            print("step Number: ", i)
+            i+=1
             current = self.open.popleft()
             self.closed.append(current)
-            print(f"Current : {current.state.player}")
-
             for action, state in current.state.successorFunction():
                 child = Node(state, current, action)
 
                 if child.state not in [node.state for node in self.closed] and child.state not in [node.state for node in self.open]:
-                    if child.state.isGoal():  
+                    if child.state.isGoal(): 
+                        print("Number of steps to reach goal: ", i) 
                         return child
                     else:
+                
                         self.open.append(child)
 
         return None

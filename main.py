@@ -9,24 +9,20 @@ import time
 
 def main():
 
-  board = SokobanPuzzle("levels/level.txt")
+  board = SokobanPuzzle("levels/level5.txt")
   board.load_level()
   bfs = AStar(board)
   path = bfs.aStarSearch()
   
   
-#   print(board.grid)
   pygame.init()
   visualizer = Visualizer(board)
 
   for node in path.getPath():
         board = node.state  
-        # board.load_level()
-        print(f"Player position{board.player}") 
         visualizer.board = board
-        
         visualizer.update()  
-        time.sleep(0.5)
+        time.sleep(1)
   
   running = True
   clock = pygame.time.Clock()
