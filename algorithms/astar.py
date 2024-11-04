@@ -11,6 +11,7 @@ class AStar:
         self.initNode.g = 0
         self.initNode.h = self.h1(state)
         self.initNode.f = self.initNode.g + self.initNode.h
+        self.withDeadLock = False
         
     def h1(self, state):
         misplaced = 0
@@ -57,12 +58,13 @@ class AStar:
             return h2Value + minPlayerDistance
         
         return h2Value
-            
-            
+    
+        
 
     def getLowesFNode(self):
         if not self.open:
             return None
+        
         
         lowestFNode = self.open[0]
         lowestF = lowestFNode.f
@@ -75,20 +77,31 @@ class AStar:
         self.open.remove(lowestFNode)
         return lowestFNode
     
-    def aStarSearch(self):
+    def aStarSearch(self, display_step):
+        
         self.open.append(self.initNode)
         if self.state.isGoal():
             return self.initNode
         i = 1
+        
+            
    
         
         while len(self.open) > 0:
             current = self.getLowesFNode()
             if current.state.isGoal():
-                print("Number of steps to reach goal: ", i)
+                display_step(i, goal=True)
                 return current
+            
+            if self.withDeadLock:
+                while current.state.checkIfBoxeIsDeadLock():
+                    current = self.getLowesFNode()
+                    if current == None:
+                        return None
+                
+             
             self.closed.append(current)
-            print("step Number: ", i)
+            display_step(i)
             i+=1    
             
             for action, state in current.state.successorFunction():

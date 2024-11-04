@@ -10,6 +10,9 @@ class SokobanPuzzle:
       self.player = None
       self.grid = []
       self.deadLockGrid = []
+      self.deadLockPositions = set()
+      self.rows_with_goals = set()
+      self.cols_with_goals = set()
       
 
     def __eq__(self, other):
@@ -21,9 +24,7 @@ class SokobanPuzzle:
 
         self.height = len(lines)
         self.width = max(len(line.rstrip('\n')) for line in lines)
-
         self.grid = []  
-
         for y, line in enumerate(lines):
             row = []
             line = line.rstrip('\n')
@@ -67,78 +68,79 @@ class SokobanPuzzle:
         
         self.width = len(self.grid[0])
         self.height = len(self.grid)
+        self.generateCornerDeadLock()
+        self.generateLineDeadLock()
+        for i in self.grid:
+            print(i)
+        print("--------------------")
+        for i in self.deadLockGrid:
+            print(i)
 
-            
-              
-    def generateCornerDeadlock(self):
-        actions = {
-            'UP': (0, -1),    
-            'RIGHT': (1, 0),
-            'LEFT': (-1, 0),
-            'DOWN': (0, 1)
-        }
-        deadLockGrid = []
-        
-        px = 0
-        for row in self.grid:
-            rowDeadLock = []
-
-            py = 0
-            for cell in row:
-                obstacleCount = 0
-                for action, (dx, dy) in actions.items():
-                    nextPx = px + dx
-                    nextPy = py + dy
-                    if 0 <= nextPy < len(self.grid) and 0 <= nextPx < len(self.grid[0]):
-                        if(cell == 'O'):
-                            obstacleCount += 1
-                    
-                    if obstacleCount == 2:
-                        break
-                
-                if obstacleCount == 2:
-                    rowDeadLock.append('D')
-                else:
-                    rowDeadLock.append(' ')
-            py += 1
-            deadLockGrid.append(rowDeadLock)
-        px += 1
-        self.deadLockGrid = deadLockGrid
-            
-          
-    def generateLignDeadLock(self):
-        actions = {
-            'UP': (0, -1),    
-            'RIGHT': (1, 0),
-            'LEFT': (-1, 0),
-            'DOWN': (0, 1)
-        }
-        px = 0
-        for row in self.deadLockGrid:
-            py = 0
-            for cell in row:
-                obstacleCount = 0
-                if cell == ' ':
-           
-                    for action, (dx, dy) in actions.items():
-                        nextPx = px + dx
-                        nextPy = py + dy
-                        if 0 <= nextPy < len(self.deadLockGrid) and 0 <= nextPx < len(self.deadLockGrid[0]):
+    
+    
+    def generateCornerDeadLock(self):
+        self.deadLockGrid = [[' ' for _ in range(self.width)] for _ in range(self.height)]
+        for y in range(self.height):
+                for x in range(self.width):
+                    pos = (x, y)
+                    cell = self.grid[y][x]
+                    if cell == ' ' or cell == 'R' and pos not in self.goals:
+                        if (self.isWallOrObstacle(x - 1, y) and self.isWallOrObstacle(x, y - 1)) or \
+                           (self.isWallOrObstacle(x + 1, y) and self.isWallOrObstacle(x, y - 1)) or \
+                           (self.isWallOrObstacle(x - 1, y) and self.isWallOrObstacle(x, y + 1)) or \
+                           (self.isWallOrObstacle(x + 1, y) and self.isWallOrObstacle(x, y + 1)):
+                            self.deadLockGrid[y][x] = 'D'
+                            self.deadLockPositions.add(pos)
                             
-                            if(self.deadLockGrid[nextPx][nextPy] == 'D'):
-                           
-                                obstacleCount += 1
-                                break
-                        
+    
+    def generateLineDeadLock(self):
+        for y in range(self.height):
+            deadLockXPositions = [x for x in range(self.width) if self.deadLockGrid[y][x] == 'D']
+            deadLockXPositions.sort()
+            for i in range(len(deadLockXPositions) - 1):
+                x1 = deadLockXPositions[i]
+                x2 = deadLockXPositions[i + 1]
+                isWallTop = all(self.isWallOrObstacle(x, y - 1) for x in range(x1 + 1, x2))
+                isWallBottom = all(self.isWallOrObstacle(x, y + 1) for x in range(x1 + 1, x2))
+                if isWallTop or isWallBottom:
+                    for x in range(x1 + 1, x2):
+                        pos = (x, y)
+                        if self.grid[y][x] == ' ' and pos not in self.goals:
+                            self.deadLockGrid[y][x] = 'D'
+                            self.deadLockPositions.add(pos)
 
-                    
-                    if obstacleCount == 1:
-                        self.deadLockGrid[px][py] = 'D'
-                py += 1
+        for x in range(self.width):
+            deadLockYPositions = [y for y in range(self.height) if self.deadLockGrid[y][x] == 'D']
+            deadLockYPositions.sort()
+            for i in range(len(deadLockYPositions) - 1):
+                y1 = deadLockYPositions[i]
+                y2 = deadLockYPositions[i + 1]
+                isWallLeft = all(self.isWallOrObstacle(x - 1, y) for y in range(y1 + 1, y2))
+                isWallRight = all(self.isWallOrObstacle(x + 1, y) for y in range(y1 + 1, y2))
+                if isWallLeft or isWallRight:
+                    for y in range(y1 + 1, y2):
+                        pos = (x, y)
+                        if self.grid[y][x] == ' ' and pos not in self.goals:
+                            self.deadLockGrid[y][x] = 'D'
+                            self.deadLockPositions.add(pos)
+                            
+                            
+    
+
+    def checkIfBoxeIsDeadLock(self):
+        return any(box in self.deadLockPositions for box in self.boxes)   
                 
-            px += 1
-        
-        
+    def isWallOrObstacle(self, x, y):
+        pos = (x, y)
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return True 
+        if pos in self.obstacles:
+            return True
+        if self.grid[y][x] == 'O':
+            return True
+        return False
+    
+ 
     def isGoal(self):
         return self.boxes == self.goals
     
@@ -147,6 +149,8 @@ class SokobanPuzzle:
         state = SokobanPuzzle(self.level) 
         state.width = self.width
         state.height = self.height
+        state.deadLockGrid = self.deadLockGrid
+        state.deadLockPositions = self.deadLockPositions.copy()
         state.grid = [row[:] for row in self.grid]
         state.obstacles = self.obstacles.copy()
         state.outSides = self.outSides.copy()
