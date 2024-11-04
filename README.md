@@ -116,7 +116,7 @@ The Pygame GUI displays the Sokoban puzzle grid and animates the steps taken to 
 - **Wall (Obstacle)**: Represented by assets/obstacle.png.
 - **Empty Space**: Represented by assets/ground.png.
 - **Target Space (Storage)**: Represented by assets/goal.png.
-- **Box (Block)**: Represented by `'B'` assets/box.png.
+- **Box (Block)**: Represented by  assets/box.png.
 - **Player on a Target Space**: Represented by a combined player and target image.
 - **Box on a Target Space**: Represented by assets/box_target.png.
 - **Outside the board**: Represented by assets/outside.png.
